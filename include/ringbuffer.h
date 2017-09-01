@@ -126,7 +126,7 @@ typedef struct ringbuff_hdr {
 RbHeader * createRingBufferHeader(uint16_t);
 RbData *createRingBuffer(uint16_t flags, int numElements, size_t dataSize); /* Creates ring buffer and all of its elements */
 RbData *createRingBufferDataElement(uint16_t flags, size_t dataSize); /* Creates rb data element */
-RbData *getRingBufferData(RbData);
+RbData *getRingBufferData(RbData *curRead);
 
 
 #endif /* RINGBUFFER_H_ */
