@@ -33,9 +33,9 @@ typedef union
 {
 	uint8_t all_flags;
 	struct {
-		uint8_t spare7 : 1,     /* Unused */
-				spare6 : 1,     /* Unused */
-				spare5 : 1,     /* Unused */
+		uint8_t multi_read : 1,            /* Support multiple readers */
+				broadcast_readers : 1,     /* If using multiple readers, broadcast or single thread */
+				use_shm : 1,               /* Use shared memory */
 				spare4 : 1,     /* Unused */
 				spare3 : 1,     /* Unused */
 				spare2 : 1,     /* Unused */
@@ -48,7 +48,7 @@ typedef union
 {
 	uint8_t all_flags;
 	struct {
-		uint8_t spare7 : 1,     /* Unused */
+		uint8_t collect_stats : 1,     /* Collect statistics */
 				spare6 : 1,     /* Unused */
 				spare5 : 1,     /* Unused */
 				spare4 : 1,     /* Unused */
@@ -96,17 +96,22 @@ struct ringbuff_ctl {
 
 
 typedef struct rbdata {
-	uint16_t flags; /* Data level flags */
+	rb_data_flags flags; /* Data level flags */
 	void *dataptr;  /* Ring buffer data */
 	void *next;  /* Single linked list. This points to next... end points back to head */
 } RbData;
+
+typedef struct  {
+	long curwrite; /* Current number of writes */
+	long curread;  /* Current number of reads */
+	long maxdiff;  /* Max diff between write and read */
+} rb_stats;
 
 typedef struct ringbuff {
 	pthread_mutex_t *rb_mutex; /* Used to insure that this rb is only accessed by a single reader or writer */
 	rb_config_flags configflags; /* Ringbuffer configuration flags */
 	rb_status_flags statusflags; /* Ringbuffer status flags */
-	long curwrite; /* Current number of writes */
-	long curread; /* Current number of reads */
+	rb_stats statistics;
 	RbData *curreadptr;
 	RbData *curwriteptr;
 } RingBuff;
@@ -123,9 +128,9 @@ typedef struct ringbuff_hdr {
 
 
 /* Function protos */
-RbHeader * createRingBufferHeader(uint16_t);
-RbData *createRingBuffer(uint16_t flags, int numElements, size_t dataSize); /* Creates ring buffer and all of its elements */
-RbData *createRingBufferDataElement(uint16_t flags, size_t dataSize); /* Creates rb data element */
+RbHeader * createRingBufferHeader(rb_hdr_flags header_flags, size_t dataSize, int numElements); /* Create rb header, set data block size */
+int createRingBuffer(RbHeader *rb_header, rb_config_flags flags, int numElements); /* Creates ring buffer and all of its elements */
+RbData *createRingBufferDataElement(rb_data_flags flags, size_t dataSize); /* Creates rb data element */
 RbData *getRingBufferData(RbData *curRead);
 
 
