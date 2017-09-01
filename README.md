@@ -28,5 +28,13 @@ my thought process:
 		My initial plan is to utilize semaphores instead of mutexes, but this may change.
 		
 
+Building this project:
+This project utilizes automake. After pulling down the source, insure that automake and friends is installed.
+Type the following commands:
+./configure
+make
+make install
+
+
 		
 		
