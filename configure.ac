@@ -1,11 +1,10 @@
-AC_INIT(src/ringbuffer.c)
+AC_INIT([abstlogger], [0.0.1], [jdanh1966@gmail.com])
 
-PACKAGE=abstlogger
-
-VERSION=0.0.1
-
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
-
-AC_PROG_CXX
-
-AC_OUTPUT(Makefile src/Makefile)
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AC_PROG_CC
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_FILES([
+ Makefile
+ src/Makefile
+])
+AC_OUTPUT
