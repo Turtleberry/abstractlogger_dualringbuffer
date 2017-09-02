@@ -59,7 +59,7 @@ RbHeader * createRingBufferHeader(rb_hdr_flags header_flags, size_t datasize, in
 				else
 					errflg = 1;
 			}
-			if ((rethdr != NULL && (errflg == 1))
+			if ((rethdr != NULL) && (errflg == 1))
 			{
 				/* Loveliness abounds partially allocated structure needs to be freed */
 			}
@@ -75,14 +75,14 @@ int main (int argc, char **argv)
 	RbHeader *myHeader = NULL;
 
 	printf("RingBuffer test\n");
-	printf("Creating RingBuffer header");
+	printf("Creating RingBuffer header\n");
 	rb_hdr_flags myFlags;
 	myFlags.all_flags = 0U;
 
 	myHeader = createRingBufferHeader(myFlags, (size_t) 256, 0); /* Header with 256 byte data element size */
 	if (myHeader != NULL)
 	{
-		printf("RingBuffer header created. Creating elements");
+		printf("RingBuffer header created. Creating elements\n");
 
 	}
 	else
