@@ -16,7 +16,9 @@
 RbHeader * createRingBufferHeader(rb_hdr_flags header_flags, size_t datasize, int numelements)
 {
 	RbHeader * rethdr;
+	int errflg = 0;
 	rethdr = (RbHeader *) malloc(sizeof(RbHeader));
+
 	if (rethdr != NULL)
 	{
 		if ((header_flags.use_shm) && (numelements == 0))
@@ -40,11 +42,28 @@ RbHeader * createRingBufferHeader(rb_hdr_flags header_flags, size_t datasize, in
 			}
 			else
 			{
+				if (pthread_mutex_init(rethdr->rb_mutex_write, NULL) == 0)
+				{
+					if (header_flags.multi_read)
+					{
+						if (pthread_mutex_init(rethdr->rb_mutex_read, NULL) != 0)
+						{
+							printf("Error initalizing rb_mutex_read.\n");
+							errflg = 1;
 
+						}
+					}
+					else
+						rethdr->rb_mutex_read = NULL;
+				}
+				else
+					errflg = 1;
+			}
+			if ((rethdr != NULL && (errflg == 1))
+			{
+				/* Loveliness abounds partially allocated structure needs to be freed */
 			}
 		}
-
-
 	}
 	return rethdr;
 }
