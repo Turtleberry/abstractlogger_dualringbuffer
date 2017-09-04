@@ -11,6 +11,12 @@
 #include <stdint.h>
 #include <pthread.h>
 
+/* Enum for statuses (statii ? ) */
+enum {
+	RB_SUCCESS = 1,
+	RB_FAILURE = -1
+};
+
 
 /* The following may seem odd, but I'm using bitfields and a union for the flags */
 
@@ -33,14 +39,14 @@ typedef union
 {
 	uint8_t all_flags;
 	struct {
-		uint8_t multi_read : 1,            /* Support multiple readers */
-				broadcast_readers : 1,     /* If using multiple readers, broadcast or single thread */
-				use_shm : 1,               /* Use shared memory */
-				spare4 : 1,     /* Unused */
-				spare3 : 1,     /* Unused */
-				spare2 : 1,     /* Unused */
-				spare1 : 1,     /* Unused */
-				spare0 : 1;     /* Unused */
+		uint8_t multi_read : 1,		/* Support multiple readers */
+				use_shm : 1,		/* Use shared memory */
+				spare5 : 1,         /* Unused */
+				spare4 : 1,			/* Unused */
+				spare3 : 1,     	/* Unused */
+				spare2 : 1,     	/* Unused */
+				spare1 : 1,     	/* Unused */
+				spare0 : 1;     	/* Unused */
 	};
 } rb_hdr_flags;
 
@@ -48,14 +54,14 @@ typedef union
 {
 	uint8_t all_flags;
 	struct {
-		uint8_t collect_stats : 1,     /* Collect statistics */
-				spare6 : 1,     /* Unused */
-				spare5 : 1,     /* Unused */
-				spare4 : 1,     /* Unused */
-				spare3 : 1,     /* Unused */
-				spare2 : 1,     /* Unused */
-				spare1 : 1,     /* Unused */
-				spare0 : 1;     /* Unused */
+		uint8_t collect_stats : 1,	/* Collect statistics */
+				spare6 : 1,     	/* Unused */
+				spare5 : 1,			/* Unused */
+				spare4 : 1,			/* Unused */
+				spare3 : 1,			/* Unused */
+				spare2 : 1,			/* Unused */
+				spare1 : 1,			/* Unused */
+				spare0 : 1;     	/* Unused */
 	};
 } rb_config_flags;
 
@@ -78,7 +84,7 @@ typedef union
 {
 	uint8_t all_flags;
 	struct {
-		uint8_t spare7 : 1,     /* Unused */
+		uint8_t dirty : 1,     	/* Unused */
 				spare6 : 1,     /* Unused */
 				spare5 : 1,     /* Unused */
 				spare4 : 1,     /* Unused */
@@ -98,7 +104,7 @@ struct ringbuff_ctl {
 typedef struct rbdata {
 	rb_data_flags flags; /* Data level flags */
 	void *dataptr;  /* Ring buffer data */
-	void *next;  /* Single linked list. This points to next... end points back to head */
+	struct rbdata *next;  /* Single linked list. This points to next... end points back to head */
 } RbData;
 
 typedef struct  {
@@ -128,9 +134,10 @@ typedef struct ringbuff_hdr {
 
 
 /* Function protos */
-RbHeader * createRingBufferHeader(rb_hdr_flags header_flags, size_t dataSize, int numElements); /* Create rb header, set data block size */
-int createRingBuffer(RbHeader *rb_header, rb_config_flags flags, int numElements); /* Creates ring buffer and all of its elements */
-RbData *createRingBufferDataElement(rb_data_flags flags, size_t dataSize); /* Creates rb data element */
+RbHeader * createRingBufferHeader(const rb_hdr_flags header_flags, const size_t dataSize, int numElements); /* Create rb header, set data block size */
+int createRingBuffer(RbHeader *rb_header, const rb_config_flags flags, const int numElements); /* Creates ring buffer and all of its elements */
+RingBuff * createRingBuff(const rb_config_flags rbcflags, const rb_data_flags rbdflags, const int numelements, const size_t dataSize); /* Creates RingBuff and calls creation of elements */
+RbData * createRingBufferData(const rb_data_flags rbdflags, const size_t buffsize, const int numelements);
 RbData *getRingBufferData(RbData *curRead);
 
 

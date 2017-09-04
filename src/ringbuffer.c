@@ -43,47 +43,94 @@ RbHeader * createRingBufferHeader(rb_hdr_flags header_flags, size_t datasize, in
 			else
 			{
 				if (pthread_mutex_init(rethdr->rb_mutex_write, NULL) == 0)
-				{
-					if (header_flags.multi_read)
-					{
-						if (pthread_mutex_init(rethdr->rb_mutex_read, NULL) != 0)
-						{
-							printf("Error initalizing rb_mutex_read.\n");
-							errflg = 1;
-
-						}
-					}
-					else
-						rethdr->rb_mutex_read = NULL;
-				}
-				else
 					errflg = 1;
 			}
 			if ((rethdr != NULL) && (errflg == 1))
 			{
-				/* Loveliness abounds partially allocated structure needs to be freed */
+				/* TODO: Loveliness abounds partially allocated structure needs to be freed */
 			}
 		}
 	}
 	return rethdr;
 }
 
+RbData * createRingBufferData(const rb_data_flags rbdflags, const size_t buffsize, const int numelements)
+{
+	/* Since this is not a double linked list, we're going to create an array to store all of the ptrs to allocated elements temporarily
+	 * such that we can very easily free everything without having to iterate through the single linked list.
+	 * This idea may be flogic... Going to think about it.
+	 */
+
+}
+
+RingBuff * createRingBuff(const rb_config_flags rbcflags, const rb_data_flags rbdflags, const int numelements, const size_t dataSize)
+{
+	RingBuff *retval;
+	/* TODO: Right now, we'll ignore config flags 'til this is tested */
+	retval = (RingBuff *) malloc(sizeof(RingBuff));
+	if (retval != NULL)
+	{
+		if (pthread_mutex_init(retval->rb_mutex, NULL) == 0)
+		{
+			/* Blew chow */
+			free(retval);
+			retval = NULL;
+		}
+		else
+		{
+
+		}
+	}
+	return retval;
+}
+
+int createRingBuffer(RbHeader *rb_header, const rb_config_flags flags, const int numelements)
+{
+	int create_status = RB_SUCCESS;
+	rb_config_flags rbcflags;
+	rb_data_flags rbdflags;
+	rbcflags.all_flags = 0;
+	rbdflags.all_flags = 0;
+	for (int i=0; ((i < 2) && (create_status == RB_SUCCESS)); i++)
+	{
+		if ((rb_header->ringbufferarray[i] = createRingBuff(rbcflags, rbdflags, numelements, rb_header->dsize)) != NULL)
+		{
+			printf("Ringbuffer %i created\n", i);
+		}
+		else
+		{
+			create_status = RB_FAILURE;
+			break;
+		}
+	}
+	return create_status;
+}
+
+
 
 /* For testing purposes, I'm creating main here. Once this code is done, I'll put this to the appropriate test files or framework */
 int main (int argc, char **argv)
 {
-	RbHeader *myHeader = NULL;
+	RbHeader *myRbHeader = NULL;
+	const size_t rbdatasize = 256;
+	const int numElements = 100;
 
 	printf("RingBuffer test\n");
 	printf("Creating RingBuffer header\n");
 	rb_hdr_flags myFlags;
 	myFlags.all_flags = 0U;
 
-	myHeader = createRingBufferHeader(myFlags, (size_t) 256, 0); /* Header with 256 byte data element size */
-	if (myHeader != NULL)
+	myRbHeader = createRingBufferHeader(myFlags, (size_t) rbdatasize, 0); /* Header with 256 byte data element size */
+	if (myRbHeader != NULL)
 	{
 		printf("RingBuffer header created. Creating elements\n");
-
+		rb_config_flags my_config_flags;
+		my_config_flags.all_flags = 0;
+		if (createRingBuffer(myRbHeader, my_config_flags, numElements) == RB_SUCCESS)
+		{
+			printf("Dual ring buffer created\n");
+			/* TODO: Create test threads, benchmark */
+		}
 	}
 	else
 		printf("Memory allocation failure attempting to create header\n");
